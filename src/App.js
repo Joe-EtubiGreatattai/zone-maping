@@ -151,7 +151,7 @@ function App() {
   const API_BASE_URL = "http://api-dev.onthegoafrica.com/zone";
 
   // Fetch businesses on app load or when logged in
-  useEffect(() => {
+  useEffect(() => {   
     if (isLoggedIn) {
       fetchBusinesses();
     }
