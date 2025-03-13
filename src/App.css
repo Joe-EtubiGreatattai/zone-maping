@@ -1,4 +1,6 @@
-body, html, #root {
+body,
+html,
+#root {
   margin: 0;
   padding: 0;
   width: 100%;
@@ -29,7 +31,8 @@ body, html, #root {
   font-size: 24px;
 }
 
-.upload-button, .register-button {
+.upload-button,
+.register-button {
   padding: 5px 10px;
   border: none;
   border-radius: 5px;
@@ -63,7 +66,7 @@ body, html, #root {
   border-radius: 8px;
   padding: 15px;
   margin-bottom: 20px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .stat-item {
@@ -176,23 +179,28 @@ body, html, #root {
 .toggle-button {
   padding: 8px 12px;
   margin-bottom: 15px;
-  border: 2px solid #01268f; /* Use a color that matches the theme */
+  border: 2px solid #01268f;
+  /* Use a color that matches the theme */
   border-radius: 5px;
   background-color: transparent;
-  color: #01268f; /* Text color */
+  color: #01268f;
+  /* Text color */
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .toggle-button:hover {
-  background-color: #01268f; /* Background color on hover */
-  color: #fff; /* Text color on hover */
+  background-color: #01268f;
+  /* Background color on hover */
+  color: #fff;
+  /* Text color on hover */
 }
 
 .toggle-button:active {
-  transform: scale(0.98); /* Slight scale effect when clicked */
-} 
+  transform: scale(0.98);
+  /* Slight scale effect when clicked */
+}
 
 /* Add these styles to the existing App.css file */
 
@@ -245,6 +253,7 @@ body, html, #root {
 .login-form button:hover {
   background-color: #0145FE;
 }
+
 /* Add these styles to the existing App.css file */
 
 .unregister-button {
@@ -285,6 +294,7 @@ body, html, #root {
   font-size: 14px;
   color: #555;
 }
+
 /* Add these styles to the existing App.css file */
 
 .modal-overlay {
@@ -381,10 +391,12 @@ body, html, #root {
 .leaflet-popup-content .unregister-button:hover {
   background-color: #c82333;
 }
+
 /* Add these styles to the existing App.css file */
 
 .logo {
-  width: 100%; /* Adjust the size as needed */
+  width: 100%;
+  /* Adjust the size as needed */
   height: auto;
   margin-bottom: 20px;
   margin-bottom: 15px;
@@ -392,8 +404,99 @@ body, html, #root {
 }
 
 .login-form .logo {
-  width: 200px; /* Adjust the size as needed */
+  width: 200px;
+  /* Adjust the size as needed */
   height: auto;
   margin-bottom: 15px;
   background: #01268f;
+}
+
+.verify-button {
+  background-color: #ffc107;
+  /* Yellow for "pending verification" */
+  color: #000;
+  border: none;
+  border-radius: 5px;
+  padding: 5px 10px;
+  cursor: pointer;
+  margin-left: 5px;
+}
+
+.verify-button.verified {
+  background-color: #28a745;
+  /* Green for "verified" */
+  color: #fff;
+}
+
+.verify-button:hover {
+  opacity: 0.8;
+}
+
+.modal-content {
+  width: 80%;
+  max-width: 900px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+.log-search-input {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.logs-table-container {
+  max-height: 60vh;
+  overflow-y: auto;
+  border-radius: 8px;
+}
+
+.logs-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.logs-table th,
+.logs-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+  font-size: 14px;
+}
+
+.logs-table th {
+  background-color: #01268f;
+  color: white;
+}
+
+.even-row {
+  background-color: #f9f9f9;
+}
+
+.odd-row {
+  background-color: #fff;
+}
+
+.close-button {
+  padding: 10px;
+  margin-top: 10px;
+  border: none;
+  background-color: #e74c3c;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.close-button:hover {
+  background-color: #c0392b;
+}
+
+/* Add this to App.css */
+.user-role-display {
+  margin-bottom: 20px;
+  font-size: 16px;
+  color: #333;
+  font-weight: bold;
 }

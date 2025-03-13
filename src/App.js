@@ -1,4 +1,4 @@
-import React, { useState, useRef, useMemo } from "react";
+import React, { useState, useRef, useMemo, useEffect } from "react";
 import * as XLSX from "xlsx";
 import L from "leaflet";
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from "react-leaflet";
@@ -8,7 +8,7 @@ import "./App.css";
 
 // Import the logo image
 import logo from "./logo.png"; // Ensure the logo.png file is in the src directory
-import logo2 from "./otg logo 3.png"; 
+import logo2 from "./otg logo 3.png";
 // Fix leaflet marker icons
 import markerIconPng from "leaflet/dist/images/marker-icon.png";
 import markerShadowPng from "leaflet/dist/images/marker-shadow.png";
@@ -21,12 +21,27 @@ L.Icon.Default.mergeOptions({
 
 // Zone colors
 const zoneColors = {
-  A: "#3498db",
-  B: "#e74c3c",
-  C: "#2ecc71",
-  D: "#f1c40f",
-  E: "#9b59b6",
-  F: "#34495e",
+  A: "#007BFF",  // Brighter blue
+  B: "#FF0000",  // Pure red
+  C: "#00C853",  // Bright green
+  D: "#FFC107",  // Vibrant yellow
+  E: "#8E24AA",  // Deep purple
+  F: "#212121",  // Darker gray/black
+};
+
+// Helper function to include x-api-key in headers
+const fetchWithApiKey = async (url, options = {}) => {
+  const headers = {
+    ...options.headers,
+    'x-api-key': '26a3281bfc65b39527447691941d6a707357a1278b1b2ec91742faec9de53ac8',
+  };
+
+  const response = await fetch(url, {
+    ...options,
+    headers,
+  });
+
+  return response;
 };
 
 // Calculate distance between two coordinates (Haversine formula)
@@ -49,13 +64,13 @@ const haversineDistance = (coords1, coords2) => {
 // Component to handle map functions
 function MapController({ centerPosition, zoom }) {
   const map = useMap();
-  
+
   React.useEffect(() => {
     if (centerPosition) {
       map.flyTo(centerPosition, zoom);
     }
   }, [centerPosition, zoom, map]);
-  
+
   return null;
 }
 
@@ -71,7 +86,7 @@ const calculateCoverage = (businesses, zone) => {
 
   allBusinessesInZone.forEach(business => {
     if (!covered.has(business.id)) {
-      const coveringBusiness = zoneBusinesses.find(b => 
+      const coveringBusiness = zoneBusinesses.find(b =>
         haversineDistance([business.latitude, business.longitude], [b.latitude, b.longitude]) <= 3000
       );
 
@@ -124,82 +139,139 @@ function App() {
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [selectedBusinessId, setSelectedBusinessId] = useState(null);
   const fileInputRef = useRef(null); // Ref for the file input
+  const [showLogsPopup, setShowLogsPopup] = useState(false);
+  const [logs, setLogs] = useState([]); // Default to an empty array
+  const [logSearch, setLogSearch] = useState(""); // New state for search query
+  const [radius, setRadius] = useState(3000); // State for radius
+  const [userRole, setUserRole] = useState(null);
+
   const mapRef = useRef(null);
 
-  const handleLogin = (e) => {
-    e.preventDefault();
-    // Simple login logic (replace with actual authentication logic)
-    if (username === "admin" && password === "password") {
-      setIsLoggedIn(true);
-    } else {
-      alert("Invalid credentials");
+  // Base URL for the API
+  const API_BASE_URL = "http://api-dev.onthegoafrica.com/zone";
+
+  // Fetch businesses on app load or when logged in
+  useEffect(() => {
+    if (isLoggedIn) {
+      fetchBusinesses();
+    }
+  }, [isLoggedIn]);
+
+  const fetchBusinesses = async () => {
+    try {
+      const response = await fetchWithApiKey(`${API_BASE_URL}/businesses`);
+      const data = await response.json();
+      if (response.ok) {
+        setBusinesses(data.businesses);
+      } else {
+        console.error('Error fetching businesses:', data.message);
+      }
+    } catch (error) {
+      console.error('Fetch businesses error:', error);
     }
   };
 
-  const handleFileUpload = (event) => {
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    try {
+      const payload = { username, password };
+      const response = await fetchWithApiKey(`${API_BASE_URL}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+      if (response.ok) {
+        setIsLoggedIn(true);
+        setUserRole(data.role); // Set the user role
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+    }
+  };
+
+  const canUploadFiles = userRole === 'admin' || userRole === 'superadmin';
+  const canVerifyBusinesses = userRole === 'admin' || userRole === 'superadmin';
+  const canViewLogs = userRole === 'superadmin';
+
+  const handleFileUpload = async (event) => {
     const files = event.target.files;
     if (!files || files.length === 0) return;
 
-    const newFiles = Array.from(files);
-    setUploadedFiles((prevFiles) => [...prevFiles, ...newFiles]);
+    const formData = new FormData();
+    Array.from(files).forEach(file => formData.append('files', file));
 
-    newFiles.forEach((file) => {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const data = new Uint8Array(e.target.result);
-        const workbook = XLSX.read(data, { type: "array" });
-        const sheetName = workbook.SheetNames[0];
-        const sheet = workbook.Sheets[sheetName];
-        const jsonData = XLSX.utils.sheet_to_json(sheet);
+    try {
+      const response = await fetchWithApiKey(`${API_BASE_URL}/upload`, {
+        method: 'POST',
+        body: formData,
+      });
+      const data = await response.json();
+      if (response.ok) {
+        // Check if data.businesses is defined and is an array
+        if (Array.isArray(data.businesses)) {
+          setBusinesses(prev => [...prev, ...data.businesses]);
+          setUploadedFiles(prev => [...prev, ...files]);
+        } else {
+          console.error('Invalid response: businesses array is missing or not iterable');
+        }
+      } else {
+        alert('File upload failed');
+      }
+    } catch (error) {
+      console.error('Upload error:', error);
+    }
 
-        const parsedData = jsonData.map((item, index) => ({
-          id: `${file.name}-${index}`, // Unique ID based on file name and index
-          name: item.name,
-          address: item.address,
-          latitude: parseFloat(item.latitude),
-          longitude: parseFloat(item.longitude),
-          category: item.category,
-          zone: item.zone,
-          registered: false,
-        }));
-
-        setBusinesses((prevBusinesses) => {
-          // Filter out duplicates based on name, latitude, and longitude
-          const newBusinesses = parsedData.filter(
-            (newBusiness) =>
-              !prevBusinesses.some(
-                (existingBusiness) =>
-                  existingBusiness.name === newBusiness.name &&
-                  existingBusiness.latitude === newBusiness.latitude &&
-                  existingBusiness.longitude === newBusiness.longitude
-              )
-          );
-          return [...prevBusinesses, ...newBusinesses];
-        });
-      };
-      reader.readAsArrayBuffer(file);
-    });
-
-    // Clear the file input after processing
     if (fileInputRef.current) {
-      fileInputRef.current.value = ""; // Reset the file input
+      fileInputRef.current.value = '';
     }
   };
 
-  const registerBusiness = (businessId) => {
-    setBusinesses((prev) => {
-      const updatedBusinesses = prev.map((b) =>
-        b.id === businessId ? { ...b, registered: true } : b
-      );
-      
-      // Find the business that was just registered to center the map on it
-      const registeredBusiness = updatedBusinesses.find(b => b.id === businessId);
-      if (registeredBusiness) {
-        setMapCenter([registeredBusiness.latitude, registeredBusiness.longitude]);
+  const handleVerify = async (businessId) => {
+    try {
+      const response = await fetchWithApiKey(`${API_BASE_URL}/verify/${businessId}`, {
+        method: 'POST',
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setBusinesses((prev) =>
+          prev.map((b) =>
+            b.id === businessId ? { ...b, verified: !b.verified } : b
+          )
+        );
+      } else {
+        alert('Verification failed');
       }
-      
-      return updatedBusinesses;
-    });
+    } catch (error) {
+      console.error('Verification error:', error);
+    }
+  };
+
+  const registerBusiness = async (businessId) => {
+    try {
+      const response = await fetchWithApiKey(`${API_BASE_URL}/register/${businessId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ radius, username }), // Send the radius and username to the backend
+      });
+      const data = await response.json();
+      if (response.ok) {
+        setBusinesses(prev => prev.map(b => b.id === businessId ? { ...b, registered: true, radius } : b));
+        const registeredBusiness = data.business;
+        setMapCenter([registeredBusiness.latitude, registeredBusiness.longitude]);
+      } else {
+        alert('Registration failed');
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+    }
   };
 
   const handleUnregister = (businessId) => {
@@ -207,28 +279,70 @@ function App() {
     setIsPasswordModalOpen(true);
   };
 
-  const handlePasswordConfirm = (enteredPassword) => {
-    if (enteredPassword === "password") { // Replace with actual password validation logic
-      setBusinesses((prev) => {
-        const updatedBusinesses = prev.map((b) =>
-          b.id === selectedBusinessId ? { ...b, registered: false } : b
-        );
-        return updatedBusinesses;
+  const handlePasswordConfirm = async (enteredPassword) => {
+    try {
+      const response = await fetchWithApiKey(`${API_BASE_URL}/unregister/${selectedBusinessId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ password: enteredPassword }),
       });
-    } else {
-      alert("Incorrect password. Unregistering failed.");
+      const data = await response.json();
+      if (response.ok) {
+        setBusinesses(prev => prev.map(b => b.id === selectedBusinessId ? { ...b, registered: false } : b));
+      } else {
+        alert(data.message);
+      }
+    } catch (error) {
+      console.error('Unregister error:', error);
     }
     setIsPasswordModalOpen(false);
   };
 
+  const fetchLogs = async () => {
+    try {
+      const response = await fetchWithApiKey(`${API_BASE_URL}/logs`);
+      const data = await response.json();
+
+      if (response.ok) {
+        let logEntries = [];
+
+        if (Array.isArray(data.logs)) {
+          logEntries = data.logs;
+        } else if (typeof data.logs === "string") {
+          logEntries = data.logs.split("\n").map(log => {
+            const match = log.match(/\[(.*?)\]\sSequelize:\sExecuting\s\(default\):\s(.*)/);
+            return match ? { timestamp: match[1], query: match[2] } : { timestamp: "Unknown", query: log };
+          });
+        }
+
+        setLogs(logEntries);
+      } else {
+        console.error("Error fetching logs:", data.message);
+        setLogs([]); // Ensure logs is always an array
+      }
+    } catch (error) {
+      console.error("Fetch logs error:", error);
+      setLogs([]); // Prevent `null` issues
+    }
+  };
+
+  // Filter logs based on search query
+  const filteredLogs = Array.isArray(logs) ? logs.filter(
+    (log) =>
+      log.timestamp.toLowerCase().includes(logSearch.toLowerCase()) ||
+      log.query.toLowerCase().includes(logSearch.toLowerCase())
+  ) : [];
+
   // Calculate registration statistics
   const stats = useMemo(() => {
     if (businesses.length === 0) return { total: 0, totalRegistered: 0, zoneRegistered: 0 };
-    
+
     const totalRegistered = businesses.filter(b => b.registered).length;
     const zoneBusinesses = businesses.filter(b => b.zone === activeZone);
     const zoneRegistered = zoneBusinesses.filter(b => b.registered).length;
-    
+
     return {
       total: businesses.length,
       totalRegistered,
@@ -245,7 +359,7 @@ function App() {
   }, [businesses, activeZone]);
 
   const zones = ["A", "B", "C", "D", "E", "F"];
-  
+
   // Filter businesses by zone and search term
   const filteredBusinesses = useMemo(() => {
     return businesses
@@ -289,16 +403,18 @@ function App() {
       <div className="sidebar">
         <img src={logo2} alt="OTG Business Zone" className="logo" />
         <h1 className="header">OTG Business Zone Map</h1>
-        <input
-          type="file"
-          accept=".xlsx,.xls"
-          onChange={handleFileUpload}
-          className="upload-button"
-          multiple // Allow multiple file uploads
-          ref={fileInputRef} // Attach the ref to the file input
-        />
-        
-        {/* Display uploaded files */}
+
+        {canUploadFiles && (
+          <input
+            type="file"
+            accept=".xlsx,.xls"
+            onChange={handleFileUpload}
+            className="upload-button"
+            multiple
+            ref={fileInputRef}
+          />
+        )}
+
         {uploadedFiles.length > 0 && (
           <div className="uploaded-files">
             <h3>Uploaded Files:</h3>
@@ -309,8 +425,21 @@ function App() {
             </ul>
           </div>
         )}
-        
-        {/* Stats Panel */}
+
+        <div className="stats-panel">
+          <div className="stat-item">
+            <span>Radius (meters):</span>
+            <input
+              type="number"
+              value={radius}
+              onChange={(e) => setRadius(parseInt(e.target.value, 10))}
+              min="100"
+              max="10000"
+              style={{ width: '60px' }}
+            />
+          </div>
+        </div>
+
         {businesses.length > 0 && (
           <div className="stats-panel">
             <div className="stat-item">
@@ -327,8 +456,65 @@ function App() {
             </div>
           </div>
         )}
-        
-        {/* Search Bar */}
+
+        {canViewLogs && (
+          <button
+            className="toggle-button"
+            onClick={() => {
+              setShowLogsPopup(true);
+              fetchLogs();
+            }}
+          >
+            View Action Logs
+          </button>
+        )}
+
+        {showLogsPopup && (
+          <div className="modal-overlay">
+            <div className="modal-content">
+              <h3>Action Logs</h3>
+              <input
+                type="text"
+                placeholder="Search logs..."
+                value={logSearch}
+                onChange={(e) => setLogSearch(e.target.value)}
+                className="log-search-input"
+              />
+              <div className="logs-table-container">
+                <table className="logs-table">
+                  <thead>
+                    <tr>
+                      <th>Timestamp</th>
+                      <th>User</th>
+                      <th>Query</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredLogs.length > 0 ? (
+                      filteredLogs.map((log, index) => (
+                        <tr key={index} className={index % 2 === 0 ? "even-row" : "odd-row"}>
+                          <td>{log.timestamp}</td>
+                          <td>{log.username}</td>
+                          <td>{log.query}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan="3" style={{ textAlign: "center", color: "gray" }}>
+                          No matching logs found
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              <button onClick={() => setShowLogsPopup(false)} className="close-button">
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+
         {businesses.length > 0 && (
           <div className="search-container">
             <input
@@ -339,8 +525,8 @@ function App() {
               className="search-input"
             />
             {searchTerm && (
-              <button 
-                className="clear-search" 
+              <button
+                className="clear-search"
                 onClick={() => setSearchTerm("")}
               >
                 ×
@@ -348,22 +534,21 @@ function App() {
             )}
           </div>
         )}
-        
-        {/* Toggle Button */}
+
         <button
           className="toggle-button"
           onClick={() => setShowAllLocations(!showAllLocations)}
         >
           {showAllLocations ? "Show Selected Zone Only" : "Show All Locations"}
         </button>
-        
+
         <div className="tabs">
           {zones.map((zone) => (
             <button
               key={zone}
               className={`tab-button ${activeZone === zone ? "active" : ""}`}
               onClick={() => setActiveZone(zone)}
-              style={{ 
+              style={{
                 backgroundColor: activeZone === zone ? zoneColors[zone] : "transparent",
                 borderColor: zoneColors[zone],
                 color: activeZone === zone ? "#fff" : zoneColors[zone]
@@ -373,7 +558,7 @@ function App() {
             </button>
           ))}
         </div>
-        
+
         <div className="business-list">
           {filteredBusinesses.length > 0 ? (
             filteredBusinesses.map((business) => (
@@ -387,14 +572,28 @@ function App() {
                 <div className="business-info">
                   <div className="business-name">{business.name}</div>
                   <div className="business-category">{business.category}</div>
+                  <div className="business-status">
+                    {business.registered ? "Registered ✅" : "Not Registered ❌"}
+                    {business.verified && " | Verified ✅"}
+                  </div>
                 </div>
                 {business.registered ? (
-                  <button
-                    onClick={() => handleUnregister(business.id)}
-                    className="unregister-button"
-                  >
-                    Unregister
-                  </button>
+                  <>
+                    <button
+                      onClick={() => handleUnregister(business.id)}
+                      className="unregister-button"
+                    >
+                      Unregister
+                    </button>
+                    {canVerifyBusinesses && (
+                      <button
+                        onClick={() => handleVerify(business.id)}
+                        className={`verify-button ${business.verified ? "verified" : ""}`}
+                      >
+                        {business.verified ? "Unverify" : "Verify"}
+                      </button>
+                    )}
+                  </>
                 ) : (
                   <button
                     onClick={() => registerBusiness(business.id)}
@@ -421,7 +620,6 @@ function App() {
         >
           <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
           {mapCenter && <MapController centerPosition={mapCenter} zoom={16} />}
-          {/* Map Markers */}
           {(showAllLocations ? businesses : businesses.filter(b => b.zone === activeZone)).map((business) => (
             <Marker
               key={business.id}
@@ -441,13 +639,24 @@ function App() {
                 Category: {business.category}<br />
                 Zone: {business.zone}<br />
                 {business.registered ? "Registered ✅" : "Not Registered ❌"}<br />
+                {business.verified && "Verified ✅"}<br />
                 {business.registered ? (
-                  <button
-                    onClick={() => handleUnregister(business.id)}
-                    className="unregister-button"
-                  >
-                    Unregister
-                  </button>
+                  <>
+                    <button
+                      onClick={() => handleUnregister(business.id)}
+                      className="unregister-button"
+                    >
+                      Unregister
+                    </button>
+                    {canVerifyBusinesses && (
+                      <button
+                        onClick={() => handleVerify(business.id)}
+                        className={`verify-button ${business.verified ? "verified" : ""}`}
+                      >
+                        {business.verified ? "Unverify" : "Verify"}
+                      </button>
+                    )}
+                  </>
                 ) : (
                   <button
                     onClick={() => registerBusiness(business.id)}
@@ -460,9 +669,9 @@ function App() {
               {business.registered && (
                 <Circle
                   center={[business.latitude, business.longitude]}
-                  radius={3000} // 3km radius
+                  radius={business.radius || 3000}
                   pathOptions={{
-                    color: "green",
+                    color: zoneColors[business.zone],
                     fillOpacity: 0.1,
                   }}
                 />
@@ -472,7 +681,6 @@ function App() {
         </MapContainer>
       </div>
 
-      {/* Password Modal */}
       <PasswordModal
         isOpen={isPasswordModalOpen}
         onClose={() => setIsPasswordModalOpen(false)}
