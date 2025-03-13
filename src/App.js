@@ -148,7 +148,7 @@ function App() {
   const mapRef = useRef(null);
 
   // Base URL for the API
-  const API_BASE_URL = "http://api-dev.onthegoafrica.com/zone";
+  const API_BASE_URL = "/api";
 
   // Fetch businesses on app load or when logged in
   useEffect(() => {   
