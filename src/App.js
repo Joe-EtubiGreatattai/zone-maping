@@ -5,6 +5,7 @@ import { MapContainer, TileLayer, Marker, Popup, Circle, useMap } from "react-le
 import { motion } from "framer-motion";
 import "leaflet/dist/leaflet.css";
 import "./App.css";
+import Zone from "./zoneing";
 
 // Import the logo image
 import logo from "./logo.png"; // Ensure the logo.png file is in the src directory
@@ -144,6 +145,7 @@ function App() {
   const [logSearch, setLogSearch] = useState(""); // New state for search query
   const [radius, setRadius] = useState(3000); // State for radius
   const [userRole, setUserRole] = useState(null);
+  const [showZoningTool, setShowZoningTool] = useState(false); // New state for showing zoning tool
 
   const mapRef = useRef(null);
 
@@ -198,6 +200,7 @@ function App() {
   const canUploadFiles = userRole === 'admin' || userRole === 'superadmin';
   const canVerifyBusinesses = userRole === 'admin' || userRole === 'superadmin';
   const canViewLogs = userRole === 'superadmin';
+  const canUseZoningTool = userRole === 'admin' || userRole === 'superadmin';
 
   const handleFileUpload = async (event) => {
     const files = event.target.files;
@@ -375,6 +378,22 @@ function App() {
       });
   }, [businesses, activeZone, searchTerm]);
 
+  // Render the Zoning Tool Dialog
+  const renderZoningToolDialog = () => {
+    if (!showZoningTool) return null;
+
+    return (
+      <div className="modal-overlay">
+        <div className="modal-content zoning-modal">
+          <Zone />
+          <button onClick={() => setShowZoningTool(false)} className="close-button">
+            Close
+          </button>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="app-container">
       {!isLoggedIn && (
@@ -440,6 +459,30 @@ function App() {
           </div>
         </div>
 
+        {/* Admin buttons panel */}
+        <div className="admin-buttons">
+          {canViewLogs && (
+            <button
+              className="admin-button"
+              onClick={() => {
+                setShowLogsPopup(true);
+                fetchLogs();
+              }}
+            >
+              View Action Logs
+            </button>
+          )}
+          
+          {canUseZoningTool && (
+            <button
+              className="admin-button zoning-button"
+              onClick={() => setShowZoningTool(true)}
+            >
+              Zoning Tool
+            </button>
+          )}
+        </div>
+
         {businesses.length > 0 && (
           <div className="stats-panel">
             <div className="stat-item">
@@ -455,18 +498,6 @@ function App() {
               <span className="stat-value">{businessesNeeded}</span>
             </div>
           </div>
-        )}
-
-        {canViewLogs && (
-          <button
-            className="toggle-button"
-            onClick={() => {
-              setShowLogsPopup(true);
-              fetchLogs();
-            }}
-          >
-            View Action Logs
-          </button>
         )}
 
         {showLogsPopup && (
@@ -681,6 +712,9 @@ function App() {
         </MapContainer>
       </div>
 
+      {/* Render modals */}
+      {renderZoningToolDialog()}
+      
       <PasswordModal
         isOpen={isPasswordModalOpen}
         onClose={() => setIsPasswordModalOpen(false)}

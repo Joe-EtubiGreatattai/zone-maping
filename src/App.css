@@ -500,3 +500,57 @@ html,
   color: #333;
   font-weight: bold;
 }
+
+/* Add these styles to your App.css file */
+
+.admin-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+  width: 100%;
+  justify-content: center;
+}
+
+.admin-button {
+  padding: 10px 12px;
+  background-color: #3a3a3a;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+  flex: 1;
+  min-width: 120px;
+}
+
+.admin-button:hover {
+  background-color: #555;
+}
+
+.zoning-button {
+  background-color: #0056b3;
+}
+
+.zoning-button:hover {
+  background-color: #003d82;
+}
+
+.zoning-modal {
+  width: 80%;
+  max-width: 900px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.modal-content {
+  position: relative;
+  background-color: white;
+  padding: 20px;
+  border-radius: 5px;
+  width: 100%;
+  max-width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
