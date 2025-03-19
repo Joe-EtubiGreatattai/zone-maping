@@ -314,7 +314,7 @@ function Zone() {
 
   return (
     <div className="app-container-i">
-      <h2>Business Zoning App</h2>
+      <h2>Business Zoning</h2>
       
       <div className="upload-container">
         <input 
