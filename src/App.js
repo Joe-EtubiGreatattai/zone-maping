@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import "leaflet/dist/leaflet.css";
 import "./App.css";
 import Zone from "./zoneing";
+import RoutePlanner from "./RoutePlanner";
 
 // Import the logo image
 import logo from "./logo.png"; // Ensure the logo.png file is in the src directory
@@ -146,14 +147,15 @@ function App() {
   const [radius, setRadius] = useState(3000); // State for radius
   const [userRole, setUserRole] = useState(null);
   const [showZoningTool, setShowZoningTool] = useState(false); // New state for showing zoning tool
+  const [showRoutePlanner, setShowRoutePlanner] = useState(false);
 
   const mapRef = useRef(null);
 
   // Base URL for the API
-  const API_BASE_URL = "/api";
+  const API_BASE_URL = "http://api-dev.onthegoafrica.com/zone/";
 
   // Fetch businesses on app load or when logged in
-  useEffect(() => {   
+  useEffect(() => {
     if (isLoggedIn) {
       fetchBusinesses();
     }
@@ -378,6 +380,8 @@ function App() {
       });
   }, [businesses, activeZone, searchTerm]);
 
+
+
   // Render the Zoning Tool Dialog
   const renderZoningToolDialog = () => {
     if (!showZoningTool) return null;
@@ -459,6 +463,8 @@ function App() {
           </div>
         </div>
 
+
+
         {/* Admin buttons panel */}
         <div className="admin-buttons">
           {canViewLogs && (
@@ -472,13 +478,22 @@ function App() {
               View Action Logs
             </button>
           )}
-          
+
           {canUseZoningTool && (
             <button
               className="admin-button zoning-button"
               onClick={() => setShowZoningTool(true)}
             >
               Zoning Tool
+            </button>
+          )}
+
+          {canUseZoningTool && (
+            <button
+              className="admin-button route-button"
+              onClick={() => setShowRoutePlanner(true)}
+            >
+              Route Planner
             </button>
           )}
         </div>
@@ -709,17 +724,29 @@ function App() {
               )}
             </Marker>
           ))}
+
+{showRoutePlanner && (
+        <div className="modal-overlay">
+          <div className="modal-content route-planner-modal">
+            <RoutePlanner
+              businesses={businesses}
+              onClose={() => setShowRoutePlanner(false)}
+            />
+          </div>
+        </div>
+      )}
         </MapContainer>
       </div>
 
       {/* Render modals */}
       {renderZoningToolDialog()}
-      
+
       <PasswordModal
         isOpen={isPasswordModalOpen}
         onClose={() => setIsPasswordModalOpen(false)}
         onConfirm={handlePasswordConfirm}
       />
+     
     </div>
   );
 }

@@ -554,3 +554,416 @@ html,
   max-height: 90vh;
   overflow-y: auto;
 }
+
+/* Route Planner Styles */
+.route-planner {
+  padding: 20px;
+  background: white;
+  border-radius: 8px;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.route-planner h3 {
+  margin-top: 0;
+  color: #2c3e50;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+}
+
+.route-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  flex: 1;
+  min-width: 200px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 5px;
+  font-weight: bold;
+}
+
+.form-group select, 
+.form-group input {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.generate-route-btn, 
+.close-route-btn {
+  padding: 8px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.generate-route-btn {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.generate-route-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.close-route-btn {
+  background-color: #f44336;
+  color: white;
+}
+
+.route-info {
+  background: #f9f9f9;
+  padding: 15px;
+  border-radius: 4px;
+  margin-top: 20px;
+}
+
+.route-info h4 {
+  margin-top: 0;
+}
+
+.route-steps {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 10px;
+}
+
+.route-steps ol {
+  padding-left: 20px;
+}
+
+.route-steps li {
+  margin-bottom: 8px;
+  padding: 5px;
+  background: white;
+  border-radius: 4px;
+}
+
+.step-distance {
+  color: #666;
+  font-size: 0.9em;
+  margin-left: 10px;
+}
+
+.route-planner-modal {
+  max-width: 850px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
+}
+
+.admin-button.route-button {
+  background-color: #6c757d;
+  margin-top: 10px;
+}
+
+.admin-button.route-button:hover {
+  background-color: #5a6268;
+}
+
+/* Route Planner Styles */
+.route-planner {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  max-width: 400px;
+  margin: 0 auto;
+}
+
+.route-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-group select, .form-group input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.generate-route-btn, .close-route-btn {
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.generate-route-btn {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.generate-route-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.close-route-btn {
+  background-color: #ef4444;
+  color: white;
+}
+
+.route-info {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.route-steps {
+  max-height: 300px;
+  overflow-y: auto;
+  margin-top: 10px;
+}
+
+.route-steps ol {
+  padding-left: 20px;
+}
+
+.route-steps li {
+  margin-bottom: 8px;
+  padding: 5px;
+  background-color: white;
+  border-radius: 4px;
+}
+
+.step-distance {
+  color: #666;
+  font-size: 0.9em;
+  margin-left: 5px;
+}
+
+/* Custom Marker Styles */
+.numbered-marker {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #3b82f6;
+  color: white;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  font-weight: bold;
+}
+
+.start-marker {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #10b981;
+  color: white;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  font-weight: bold;
+  font-size: 10px;
+  padding: 2px;
+}
+
+.end-marker {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ef4444;
+  color: white;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  font-weight: bold;
+  font-size: 10px;
+  padding: 2px;
+}
+
+/* Route Planner Modal Styles */
+.route-planner-modal {
+  position: relative;
+  width: 90%;
+  max-width: 1000px;
+  max-height: 90vh;
+  background: white;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.route-planner-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 20px;
+  background: #3b82f6;
+  color: white;
+}
+
+.route-planner-header h3 {
+  margin: 0;
+}
+
+.close-route-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+
+.route-planner-content {
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.route-controls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.form-group label {
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.form-group select, .form-group input {
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.generate-route-btn {
+  padding: 10px;
+  background-color: #3b82f6;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: bold;
+  align-self: end;
+  grid-column: 1 / -1;
+}
+
+.generate-route-btn:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+
+.route-map-container {
+  margin-bottom: 20px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.route-info {
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+}
+
+.route-stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  margin-bottom: 15px;
+}
+
+.route-stats div {
+  display: flex;
+  justify-content: space-between;
+  padding: 8px;
+  background: white;
+  border-radius: 4px;
+}
+
+.route-steps {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.route-steps ol {
+  padding-left: 20px;
+}
+
+.route-steps li {
+  margin-bottom: 8px;
+  padding: 8px;
+  background-color: white;
+  border-radius: 4px;
+}
+
+.step-distance {
+  color: #666;
+  font-size: 0.9em;
+  margin-left: 5px;
+}
+
+/* Custom Marker Styles */
+.numbered-marker {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #3b82f6;
+  color: white;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  font-weight: bold;
+}
+
+.start-marker {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #10b981;
+  color: white;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  font-weight: bold;
+  font-size: 10px;
+  padding: 2px;
+}
+
+.end-marker {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #ef4444;
+  color: white;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 0 5px rgba(0, 0, 0, 0.3);
+  font-weight: bold;
+  font-size: 10px;
+  padding: 2px;
+}
